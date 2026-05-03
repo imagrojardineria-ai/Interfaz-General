@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Centro de Operaciones | IM AGROJARDINERÍA</title>
+  <style>
+    :root {
+      --verde: #8cc63f;
+      --verde-oscuro: #345c1c;
+      --verde-suave: #eef8e6;
+      --gris: #f4f6f3;
+      --gris-2: #e6e9e3;
+      --texto: #1f2933;
+      --rojo: #d62828;
+      --rojo-suave: #fee2e2;
+      --amarillo: #f4a261;
+      --amarillo-suave: #fff7ed;
+      --azul: #2a9d8f;
+      --azul-suave: #e0f2fe;
+      --morado: #7c3aed;
+      --morado-suave: #ede9fe;
+      --blanco: #ffffff;
+      --sombra: 0 12px 30px rgba(0,0,0,.08);
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Arial, Helvetica, sans-serif; background: var(--gris); color: var(--texto); }
+    header { background: linear-gradient(135deg, var(--verde-oscuro), var(--verde)); color: white; padding: 30px 18px; text-align: center; }
+    header h1 { margin: 0; font-size: 31px; letter-spacing: .5px; text-transform: uppercase; }
+    header p { margin: 8px 0 0; font-size: 15px; opacity: .95; }
+    .container { max-width: 1450px; margin: auto; padding: 22px; }
+    .nav { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; position: sticky; top: 0; background: var(--gris); padding: 12px 0; z-index: 10; }
+    .nav button { border: none; background: white; padding: 11px 15px; border-radius: 12px; cursor: pointer; font-weight: 700; box-shadow: var(--sombra); color: var(--texto); }
+    .nav button.active { background: var(--verde-oscuro); color: white; }
+    .section { display: none; }
+    .section.active { display: block; }
+    .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px; }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 20px; }
+    .card { background: white; border-radius: 20px; padding: 18px; box-shadow: var(--sombra); border: 1px solid rgba(0,0,0,.04); }
+    .card h3 { margin: 0 0 8px; font-size: 14px; color: #52616b; text-transform: uppercase; }
+    .metric { font-size: 30px; font-weight: 800; margin: 4px 0; }
+    .small { font-size: 13px; color: #6b7280; }
+    .danger { color: var(--rojo); } .success { color: var(--verde-oscuro); } .warning { color: var(--amarillo); } .info { color: var(--azul); } .purple { color: var(--morado); }
+    .panel-title { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .panel-title h2 { margin: 0; font-size: 22px; }
+    input, select, textarea { width: 100%; padding: 11px; border: 1px solid #d5d8d2; border-radius: 12px; font-size: 14px; background: white; }
+    textarea { min-height: 80px; resize: vertical; }
+    label { display: block; margin: 10px 0 5px; font-size: 13px; font-weight: 700; color: #475569; }
+    .form-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .form-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .btn { border: none; padding: 12px 16px; border-radius: 12px; background: var(--verde-oscuro); color: white; font-weight: 800; cursor: pointer; margin-top: 12px; }
+    .btn.secondary { background: #374151; } .btn.danger { background: var(--rojo); color: white; } .btn.gold { background: #b7791f; color: white; } .btn.blue { background: var(--azul); }
+    table { width: 100%; border-collapse: collapse; margin-top: 14px; overflow: hidden; border-radius: 12px; }
+    th, td { padding: 11px; border-bottom: 1px solid #e5e7eb; font-size: 13px; text-align: left; vertical-align: top; }
+    th { background: #eef4e7; color: var(--verde-oscuro); text-transform: uppercase; font-size: 12px; }
+    .status { padding: 5px 9px; border-radius: 999px; font-size: 12px; font-weight: 800; display: inline-block; }
+    .status.pendiente { background: #fff3cd; color: #8a6100; }
+    .status.proceso { background: #dbeafe; color: #1d4ed8; }
+    .status.cerrado, .status.completado, .status.pagado, .status.cobrado, .status.si { background: #dcfce7; color: #166534; }
+    .status.perdido, .status.vencido, .status.no { background: #fee2e2; color: #991b1b; }
+    .status.credito30dias, .status.credito60dias, .status.parcial { background: #ede9fe; color: #5b21b6; }
+    .progress-wrap { background: #e5e7eb; border-radius: 999px; overflow: hidden; height: 14px; margin-top: 8px; }
+    .progress { height: 100%; background: linear-gradient(90deg, var(--verde), var(--verde-oscuro)); width: 0%; transition: width .3s ease; }
+    .progress.red { background: linear-gradient(90deg, #ef4444, #991b1b); }
+    .quote { font-size: 18px; line-height: 1.4; font-weight: 800; color: var(--verde-oscuro); }
+    .alerta { padding: 14px; border-radius: 14px; background: #fff7ed; border: 1px solid #fed7aa; color: #9a3412; font-weight: 700; }
+    .footer-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+    .tag { display:inline-block; padding:4px 8px; border-radius:999px; background:#eef4e7; color:var(--verde-oscuro); font-size:12px; font-weight:800; }
+    .positive { color:#166534; font-weight:800; } .negative { color:#b91c1c; font-weight:800; }
+    .hero-dashboard { background: linear-gradient(135deg,#ffffff,#f1f8ea); border: 1px solid #d9ebc7; }
+    .calendar-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:8px; margin-top:12px; }
+    .calendar-day { min-height:95px; background:#fff; border:1px solid #e5e7eb; border-radius:14px; padding:8px; font-size:12px; }
+    .calendar-day.today { border:2px solid var(--verde-oscuro); background:var(--verde-suave); }
+    .calendar-num { font-weight:900; color:var(--verde-oscuro); margin-bottom:5px; }
+    .event-pill { display:block; padding:4px 6px; border-radius:8px; margin:3px 0; background:#eef4e7; color:#345c1c; font-weight:700; font-size:11px; }
+    .habit-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; }
+    .habit-card { border:1px solid #e5e7eb; border-radius:18px; padding:16px; text-align:center; cursor:pointer; background:#fff; transition:.2s; }
+    .habit-card.done { background:#dcfce7; border-color:#86efac; }
+    .habit-icon { font-size:28px; margin-bottom:6px; }
+    .habit-name { font-weight:900; }
+    .habit-sub { font-size:12px; color:#64748b; margin-top:4px; }
+
+    @media (max-width: 1000px) {
+      .grid, .grid-3, .grid-2, .form-grid, .form-grid-3, .habit-grid { grid-template-columns: 1fr; }
+      header h1 { font-size: 24px; }
+      .metric { font-size: 25px; }
+      table { display:block; overflow-x:auto; white-space:nowrap; }
+      .calendar-grid { grid-template-columns:repeat(2,1fr); }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Centro de Operaciones Diario</h1>
+    <p>IM AGROJARDINERÍA | Finanzas · Ventas · Utilidad · Crédito · Agenda · Disciplina personal</p>
+  </header>
+
+  <main class="container">
+    <div class="nav">
+      <button class="active" onclick="showSection('dashboard', this)">Dashboard</button>
+      <button onclick="showSection('caja', this)">Caja de Hoy</button>
+      <button onclick="showSection('finanzas', this)">Finanzas</button>
+      <button onclick="showSection('ventas', this)">Ventas / CxC</button>
+      <button onclick="showSection('proveedor', this)">Proveedor $5.000</button>
+      <button onclick="showSection('reto', this)">Reto 70/20/10</button>
+      <button onclick="showSection('agenda', this)">Agenda</button>
+      <button onclick="showSection('ideas', this)">Ideas</button>
+      <button onclick="showSection('personal', this)">Personal</button>
+    </div>
+
+    <section id="dashboard" class="section active">
+      <div class="grid hero-dashboard card">
+        <div><h3>Caja actual</h3><div class="metric success" id="dashCaja">$0.00</div><div class="small">Banco + efectivo.</div></div>
+        <div><h3>Por cobrar</h3><div class="metric info" id="dashPorCobrar">$0.00</div><div class="small">Ventas pendientes de cobro, sin IVA.</div></div>
+        <div><h3>Por pagar</h3><div class="metric danger" id="dashPorPagar">$0.00</div><div class="small">Gastos fijos + proveedor + obligaciones.</div></div>
+        <div><h3>Presión real</h3><div class="metric" id="dashPresion">$0.00</div><div class="small">Caja usable + CxC - CxP.</div></div>
+      </div>
+
+      <div class="grid">
+        <div class="card"><h3>Utilidad del mes</h3><div class="metric success" id="dashUtilidad">$0.00</div><div class="small">Venta - costo - gastos.</div></div>
+        <div class="card"><h3>Margen promedio</h3><div class="metric purple" id="dashMargen">0%</div><div class="small">Rentabilidad real de ventas cerradas.</div></div>
+        <div class="card"><h3>Proveedor pendiente</h3><div class="metric danger" id="dashProveedor">$5,000.00</div><div class="small">Deuda crítica.</div></div>
+        <div class="card"><h3>Ahorro acumulado</h3><div class="metric success" id="dashAhorro">$0.00</div><div class="small">Reto 70/20/10.</div></div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="panel-title"><h2>Meta mensual de ventas SIN IVA</h2></div>
+          <label>Meta del mes</label><input type="number" id="metaMensual" placeholder="Ej: 12000" oninput="saveAndRender()" />
+          <div class="progress-wrap"><div class="progress" id="progresoVentas"></div></div>
+          <p class="small" id="textoProgreso">Avance: 0%</p>
+          <p class="quote" id="diagnosticoDia">Hoy no necesitas motivación. Necesitas registrar, decidir y ejecutar.</p>
+        </div>
+        <div class="card">
+          <div class="panel-title"><h2>Mandato del día</h2></div>
+          <label>Prioridad #1 de hoy</label><input id="prioridadHoy" placeholder="Ej: cobrar X cliente / cerrar X venta" oninput="saveAndRender()" />
+          <label>Decisión difícil pendiente</label><input id="decisionDificil" placeholder="Ej: no comprar inventario sin flujo" oninput="saveAndRender()" />
+          <label>Regla financiera del día</label><input id="reglaDia" placeholder="Ej: separar IVA y no tocar ahorro" oninput="saveAndRender()" />
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Diagnóstico brutal de flujo</h2>
+        <p class="alerta" id="diagnosticoFlujo">Carga tus datos reales. Sin registro, estás manejando a ciegas.</p>
+      </div>
+    </section>
+
+    <section id="caja" class="section">
+      <div class="card">
+        <div class="panel-title"><h2>Caja de hoy</h2><span class="tag">Uso diario obligatorio</span></div>
+        <div class="form-grid-3">
+          <div><label>Banco actual</label><input type="number" id="bancoActual" placeholder="0.00" oninput="saveAndRender()"></div>
+          <div><label>Efectivo actual</label><input type="number" id="efectivoActual" placeholder="0.00" oninput="saveAndRender()"></div>
+          <div><label>Dinero separado para IVA</label><input type="number" id="ivaSeparado" placeholder="0.00" oninput="saveAndRender()"></div>
+          <div><label>Meta ahorro mensual</label><input type="number" id="metaAhorro" placeholder="Ej: 100" oninput="saveAndRender()"></div>
+          <div><label>Comida semanal estimada</label><input type="number" id="comidaSemanal" placeholder="80" oninput="saveAndRender()"></div>
+        </div>
+      </div>
+
+      <div class="grid-3">
+        <div class="card"><h3>Caja total</h3><div class="metric success" id="cajaTotal">$0.00</div></div>
+        <div class="card"><h3>Caja usable</h3><div class="metric info" id="cajaUsable">$0.00</div><div class="small">Caja total - IVA separado.</div></div>
+        <div class="card"><h3>Gastos fijos mensuales</h3><div class="metric danger" id="dashFijos">$0.00</div></div>
+      </div>
+    </section>
+
+    <section id="finanzas" class="section">
+      <div class="grid-2">
+        <div class="card">
+          <div class="panel-title"><h2>Gastos fijos mensuales</h2></div>
+          <table><thead><tr><th>Concepto</th><th>Monto</th></tr></thead><tbody id="tablaFijos"></tbody></table>
+          <p class="quote" id="resumenFijos"></p>
+        </div>
+        <div class="card">
+          <div class="panel-title"><h2>Registro financiero</h2></div>
+          <div class="form-grid-3">
+            <div><label>Fecha</label><input type="date" id="finFecha"></div>
+            <div><label>Tipo</label><select id="finTipo"><option>Ingreso</option><option>Egreso</option><option>Obligación pendiente</option><option>Ahorro</option><option>Pago deuda</option></select></div>
+            <div><label>Monto</label><input type="number" id="finMonto" placeholder="0.00"></div>
+            <div><label>Categoría</label><input id="finCategoria" placeholder="Venta, proveedor, casa, escuela..."></div>
+            <div><label>Detalle</label><input id="finDetalle" placeholder="Descripción corta"></div>
+            <div><label>Estado</label><select id="finEstado"><option>Pendiente</option><option>Completado</option><option>Pagado</option></select></div>
+          </div>
+          <button class="btn" onclick="addFinanza()">Agregar movimiento</button>
+        </div>
+      </div>
+      <div class="card">
+        <table><thead><tr><th>Fecha</th><th>Tipo</th><th>Categoría</th><th>Detalle</th><th>Monto</th><th>Estado</th><th></th></tr></thead><tbody id="tablaFinanzas"></tbody></table>
+      </div>
+    </section>
+
+    <section id="ventas" class="section">
+      <div class="card">
+        <div class="panel-title"><h2>Ventas, utilidad automática, crédito y cuentas por cobrar</h2><span class="tag">Registrar SIN IVA</span></div>
+        <div class="form-grid">
+          <div><label>Cliente</label><input id="ventaCliente" placeholder="Nombre del cliente"></div>
+          <div><label>Oportunidad / Producto</label><input id="ventaDetalle" placeholder="Equipo, repuesto, mantenimiento..."></div>
+          <div><label>Valor venta SIN IVA</label><input type="number" id="ventaValor" placeholder="0.00"></div>
+          <div><label>Costo de venta</label><input type="number" id="ventaCosto" placeholder="0.00"></div>
+          <div><label>Otros gastos</label><input type="number" id="ventaGastos" placeholder="0.00"></div>
+          <div><label>IVA cobrado / separado</label><input type="number" id="ventaIva" placeholder="0.00"></div>
+          <div><label>Estado venta</label><select id="ventaEstado"><option>Pendiente</option><option>Proceso</option><option>Cerrado</option><option>Perdido</option></select></div>
+          <div><label>Forma de cobro</label><select id="ventaCobro"><option>Contado</option><option>Crédito 30 días</option><option>Crédito 60 días</option><option>Parcial</option></select></div>
+          <div><label>Fecha venta</label><input type="date" id="ventaFecha"></div>
+          <div><label>Fecha estimada cobro</label><input type="date" id="ventaCobroFecha"></div>
+          <div><label>Estado cobro</label><select id="ventaEstadoCobro"><option>Pendiente</option><option>Cobrado</option><option>Vencido</option></select></div>
+          <div><label>Responsable</label><input id="ventaResponsable" placeholder="Luis, Andrea, vendedor..."></div>
+          <div><label>Próximo seguimiento</label><input type="date" id="ventaSeguimiento"></div>
+        </div>
+        <button class="btn" onclick="addVenta()">Agregar venta / cuenta por cobrar</button>
+        <table><thead><tr><th>Cliente</th><th>Detalle</th><th>Venta sin IVA</th><th>Costo</th><th>Gastos</th><th>Utilidad</th><th>Margen</th><th>Cobro</th><th>Fecha cobro</th><th>Estado cobro</th><th></th></tr></thead><tbody id="tablaVentas"></tbody></table>
+      </div>
+    </section>
+
+    <section id="proveedor" class="section">
+      <div class="grid-3">
+        <div class="card"><h3>Deuda inicial</h3><div class="metric danger">$5,000.00</div></div>
+        <div class="card"><h3>Pagado</h3><div class="metric success" id="proveedorPagado">$0.00</div></div>
+        <div class="card"><h3>Saldo pendiente</h3><div class="metric danger" id="proveedorSaldo">$5,000.00</div></div>
+      </div>
+      <div class="card">
+        <div class="panel-title"><h2>Plan de pago al proveedor</h2></div>
+        <div class="form-grid-3">
+          <div><label>Fecha pago</label><input type="date" id="provFecha"></div>
+          <div><label>Monto pagado / prometido</label><input type="number" id="provMonto" placeholder="0.00"></div>
+          <div><label>Estado</label><select id="provEstado"><option>Pendiente</option><option>Pagado</option></select></div>
+          <div><label>Observación</label><input id="provObs" placeholder="Ej: abono semanal, transferencia..."></div>
+        </div>
+        <button class="btn" onclick="addProveedorPago()">Agregar pago proveedor</button>
+        <table><thead><tr><th>Fecha</th><th>Monto</th><th>Estado</th><th>Observación</th><th></th></tr></thead><tbody id="tablaProveedor"></tbody></table>
+        <p class="alerta" id="planProveedorTexto"></p>
+      </div>
+    </section>
+
+    <section id="reto" class="section">
+      <div class="card">
+        <div class="panel-title"><h2>Reto financiero 70 / 20 / 10</h2><span class="tag">Disciplina, no emoción</span></div>
+        <p class="small">Regla sugerida: 70% operación y vida básica, 20% deuda crítica/proveedor, 10% ahorro. Aunque sea pequeño, el 10% construye el hábito.</p>
+        <div class="form-grid-3">
+          <div><label>Ingreso disponible del día / semana</label><input type="number" id="retoIngreso" placeholder="0.00"></div>
+          <div><label>Fecha</label><input type="date" id="retoFecha"></div>
+          <div><label>Nota</label><input id="retoNota" placeholder="Ej: venta cobrada, abono cliente..."></div>
+        </div>
+        <button class="btn gold" onclick="addReto()">Aplicar 70/20/10</button>
+      </div>
+      <div class="grid-3">
+        <div class="card"><h3>70% Vida / operación</h3><div class="metric" id="reto70">$0.00</div></div>
+        <div class="card"><h3>20% Deuda</h3><div class="metric danger" id="reto20">$0.00</div></div>
+        <div class="card"><h3>10% Ahorro</h3><div class="metric success" id="reto10">$0.00</div></div>
+      </div>
+      <div class="card"><table><thead><tr><th>Fecha</th><th>Ingreso</th><th>70%</th><th>20%</th><th>10%</th><th>Nota</th><th></th></tr></thead><tbody id="tablaReto"></tbody></table></div>
+    </section>
+
+    <section id="agenda" class="section">
+      <div class="grid-2">
+        <div class="card">
+          <div class="panel-title"><h2>Agenda diaria</h2><span class="tag">Vista tipo calendario</span></div>
+          <div class="form-grid-3">
+            <div><label>Fecha</label><input type="date" id="taskFecha"></div>
+            <div><label>Hora</label><input type="time" id="taskHora"></div>
+            <div><label>Área</label><select id="taskArea"><option>Ventas</option><option>Cobranza</option><option>Finanzas</option><option>Operación</option><option>Personal</option><option>Familia</option></select></div>
+            <div><label>Prioridad</label><select id="taskPrioridad"><option>Alta</option><option>Media</option><option>Baja</option></select></div>
+            <div><label>Tarea</label><input id="taskTexto" placeholder="Acción concreta"></div>
+            <div><label>Estado</label><select id="taskEstado"><option>Pendiente</option><option>Completado</option></select></div>
+          </div>
+          <button class="btn" onclick="addTask()">Agregar tarea</button>
+        </div>
+        <div class="card">
+          <h2>Top prioridades de hoy</h2>
+          <div id="tareasHoy"></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Calendario visual del mes</h2>
+        <div class="calendar-grid" id="calendarGrid"></div>
+      </div>
+      <div class="card">
+        <table><thead><tr><th>Fecha</th><th>Hora</th><th>Área</th><th>Prioridad</th><th>Tarea</th><th>Estado</th><th></th></tr></thead><tbody id="tablaTasks"></tbody></table>
+      </div>
+    </section>
+
+    <section id="ideas" class="section">
+      <div class="card">
+        <div class="panel-title"><h2>Banco de ideas y avances</h2></div>
+        <div class="form-grid-3">
+          <div><label>Idea</label><input id="ideaTexto" placeholder="Nueva idea o mejora"></div>
+          <div><label>Impacto</label><select id="ideaImpacto"><option>Alto</option><option>Medio</option><option>Bajo</option></select></div>
+          <div><label>Facilidad</label><select id="ideaFacilidad"><option>Fácil</option><option>Media</option><option>Difícil</option></select></div>
+          <div><label>Estado</label><select id="ideaEstado"><option>Pendiente</option><option>Proceso</option><option>Completado</option></select></div>
+        </div>
+        <label>Avance o comentario</label><textarea id="ideaComentario" placeholder="Qué se hizo, qué falta o qué decisión tomar..."></textarea>
+        <button class="btn" onclick="addIdea()">Guardar idea</button>
+        <table><thead><tr><th>Idea</th><th>Impacto</th><th>Facilidad</th><th>Estado</th><th>Comentario</th><th></th></tr></thead><tbody id="tablaIdeas"></tbody></table>
+      </div>
+    </section>
+
+    <section id="personal" class="section">
+      <div class="grid-2">
+        <div class="card">
+          <div class="panel-title"><h2>Disciplina diaria visual</h2><span class="tag">5 hábitos no negociables</span></div>
+          <div class="habit-grid">
+            <div class="habit-card" onclick="toggleHabit('levantarse5am')"><div class="habit-icon">🌅</div><div class="habit-name">5 AM</div><div class="habit-sub">levantarse temprano</div></div>
+            <div class="habit-card" onclick="toggleHabit('leer')"><div class="habit-icon">📖</div><div class="habit-name">Leer</div><div class="habit-sub">mínimo diario</div></div>
+            <div class="habit-card" onclick="toggleHabit('ejercicio')"><div class="habit-icon">💪</div><div class="habit-name">Ejercicio</div><div class="habit-sub">mover el cuerpo</div></div>
+            <div class="habit-card" onclick="toggleHabit('agua')"><div class="habit-icon">💧</div><div class="habit-name">2L Agua</div><div class="habit-sub">hidratación</div></div>
+            <div class="habit-card" onclick="toggleHabit('estudiar')"><div class="habit-icon">🧠</div><div class="habit-name">Estudiar</div><div class="habit-sub">algo nuevo</div></div>
+          </div>
+          <div class="progress-wrap"><div class="progress" id="disciplinaBar"></div></div>
+          <p class="quote" id="disciplinaScore">Disciplina del día: 0/5</p>
+        </div>
+        <div class="card">
+          <div class="panel-title"><h2>Registro personal</h2></div>
+          <div class="form-grid-3">
+            <div><label>Fecha</label><input type="date" id="perFecha"></div>
+            <div><label>Energía 1-10</label><input type="number" id="perEnergia" min="1" max="10"></div>
+            <div><label>Ánimo 1-10</label><input type="number" id="perAnimo" min="1" max="10"></div>
+            <div><label>Tiempo con familia</label><select id="perFamilia"><option>No</option><option>Sí</option></select></div>
+            <div><label>Aprendizaje</label><input id="perAprendizaje" placeholder="Qué aprendí hoy"></div>
+          </div>
+          <label>Reflexión brutalmente honesta</label><textarea id="perReflexion" placeholder="Qué estoy evitando, qué hice bien, qué debo corregir mañana..."></textarea>
+          <button class="btn" onclick="addPersonal()">Guardar registro</button>
+        </div>
+      </div>
+      <div class="card"><table><thead><tr><th>Fecha</th><th>Energía</th><th>Ánimo</th><th>Familia</th><th>Aprendizaje</th><th>Reflexión</th><th>Hábitos</th><th></th></tr></thead><tbody id="tablaPersonal"></tbody></table></div>
+    </section>
+
+    <div class="footer-actions">
+      <button class="btn secondary" onclick="exportData()">Exportar datos</button>
+      <button class="btn secondary" onclick="window.print()">Imprimir / PDF</button>
+      <button class="btn danger" onclick="clearAll()">Borrar todo</button>
+    </div>
+  </main>
+
+  <script>
+    const KEY = 'centro_operaciones_im_agrojardineria_v3_completo';
+    const DEUDA_PROVEEDOR = 5000;
+    const today = new Date().toISOString().slice(0,10);
+    const todayDay = new Date().getDate();
+
+    const gastosFijos = [
+      { concepto: 'Casa', monto: 550 },
+      { concepto: 'Alícuotas', monto: 50 },
+      { concepto: 'Servicios básicos: agua, luz e internet', monto: 200 },
+      { concepto: 'Planes celulares', monto: 60 },
+      { concepto: 'Escuelas', monto: 75 },
+      { concepto: 'Préstamos', monto: 240 },
+      { concepto: 'Comida y cosas de casa estimada mensual', monto: 320 }
+    ];
+
+    let data = JSON.parse(localStorage.getItem(KEY)) || {
+      metaMensual: '', prioridadHoy: '', decisionDificil: '', reglaDia: '',
+      bancoActual: '', efectivoActual: '', ivaSeparado: '', metaAhorro: '', comidaSemanal: 80,
+      finanzas: [], ventas: [], tasks: [], ideas: [], personal: [], proveedor: [], reto: [], habits: {}
+    };
+
+    function money(n) { return '$' + (Number(n || 0)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+    function save() { localStorage.setItem(KEY, JSON.stringify(data)); }
+
+    function showSection(id, btn) {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    function initDates() { ['finFecha','taskFecha','perFecha','ventaFecha','provFecha','retoFecha'].forEach(id => { const el = document.getElementById(id); if(el) el.value = today; }); }
+
+    function loadHeaderFields() {
+      ['metaMensual','prioridadHoy','decisionDificil','reglaDia','bancoActual','efectivoActual','ivaSeparado','metaAhorro','comidaSemanal'].forEach(id => {
+        const el = document.getElementById(id); if (el) el.value = data[id] || '';
+      });
+    }
+
+    function saveAndRender() {
+      ['metaMensual','prioridadHoy','decisionDificil','reglaDia','bancoActual','efectivoActual','ivaSeparado','metaAhorro','comidaSemanal'].forEach(id => {
+        const el = document.getElementById(id); if (el) data[id] = el.value;
+      });
+      save(); render();
+    }
+
+    function addFinanza() {
+      data.finanzas.push({ fecha: finFecha.value, tipo: finTipo.value, monto: Number(finMonto.value || 0), categoria: finCategoria.value, detalle: finDetalle.value, estado: finEstado.value });
+      finMonto.value = finCategoria.value = finDetalle.value = ''; save(); render();
+    }
+
+    function addVenta() {
+      const valor = Number(ventaValor.value || 0);
+      const costo = Number(ventaCosto.value || 0);
+      const gastos = Number(ventaGastos.value || 0);
+      const utilidad = valor - costo - gastos;
+      const margen = valor > 0 ? (utilidad / valor) * 100 : 0;
+      data.ventas.push({
+        cliente: ventaCliente.value, detalle: ventaDetalle.value, valor, costo, gastos, utilidad, margen, iva: Number(ventaIva.value || 0), estado: ventaEstado.value,
+        cobro: ventaCobro.value, fecha: ventaFecha.value, cobroFecha: ventaCobroFecha.value, estadoCobro: ventaEstadoCobro.value, responsable: ventaResponsable.value, seguimiento: ventaSeguimiento.value
+      });
+      ventaCliente.value = ventaDetalle.value = ventaValor.value = ventaCosto.value = ventaGastos.value = ventaIva.value = ventaCobroFecha.value = ventaResponsable.value = ventaSeguimiento.value = ''; save(); render();
+    }
+
+    function addProveedorPago() {
+      data.proveedor.push({ fecha: provFecha.value, monto: Number(provMonto.value || 0), estado: provEstado.value, obs: provObs.value });
+      provMonto.value = provObs.value = ''; save(); render();
+    }
+
+    function addReto() {
+      const ingreso = Number(retoIngreso.value || 0);
+      data.reto.push({ fecha: retoFecha.value, ingreso, vida: ingreso * .70, deuda: ingreso * .20, ahorro: ingreso * .10, nota: retoNota.value });
+      data.finanzas.push({ fecha: retoFecha.value, tipo: 'Ahorro', monto: ingreso * .10, categoria: 'Reto 70/20/10', detalle: retoNota.value || 'Ahorro automático 10%', estado: 'Completado' });
+      retoIngreso.value = retoNota.value = ''; save(); render();
+    }
+
+    function addTask() { data.tasks.push({ fecha: taskFecha.value, hora: taskHora.value, area: taskArea.value, prioridad: taskPrioridad.value, texto: taskTexto.value, estado: taskEstado.value }); taskTexto.value = ''; taskHora.value = ''; save(); render(); }
+    function addIdea() { data.ideas.push({ texto: ideaTexto.value, impacto: ideaImpacto.value, facilidad: ideaFacilidad.value, estado: ideaEstado.value, comentario: ideaComentario.value }); ideaTexto.value = ideaComentario.value = ''; save(); render(); }
+    function addPersonal() { data.personal.push({ fecha: perFecha.value, energia: perEnergia.value, animo: perAnimo.value, familia: perFamilia.value, aprendizaje: perAprendizaje.value, reflexion: perReflexion.value, habits: {...data.habits} }); perEnergia.value = perAnimo.value = perAprendizaje.value = perReflexion.value = ''; save(); render(); }
+    function removeItem(list, index) { data[list].splice(index, 1); save(); render(); }
+    function toggleHabit(key) { data.habits[key] = !data.habits[key]; save(); render(); }
+    function badge(value) { const cls = String(value).toLowerCase().replaceAll(' ', '').replaceAll('/', ''); return `<span class="status ${cls}">${value}</span>`; }
+
+    function renderCalendar() {
+      const cal = document.getElementById('calendarGrid');
+      if(!cal) return;
+      cal.innerHTML = '';
+      const year = new Date().getFullYear();
+      const month = new Date().getMonth();
+      const days = new Date(year, month + 1, 0).getDate();
+      for (let i=1; i<=days; i++) {
+        const dateStr = new Date(year, month, i).toISOString().slice(0,10);
+        const tasks = data.tasks.filter(t => t.fecha === dateStr);
+        const box = document.createElement('div');
+        box.className = 'calendar-day' + (i === todayDay ? ' today' : '');
+        box.innerHTML = `<div class="calendar-num">${i}</div>` + tasks.slice(0,3).map(t => `<span class="event-pill">${t.hora || ''} ${t.area}: ${t.texto}</span>`).join('');
+        cal.appendChild(box);
+      }
+    }
+
+    function render() {
+      const comidaMensual = Number(data.comidaSemanal || 80) * 4;
+      gastosFijos[gastosFijos.length - 1].monto = comidaMensual;
+      const totalFijos = gastosFijos.reduce((a,b) => a + Number(b.monto), 0);
+      const banco = Number(data.bancoActual || 0), efectivo = Number(data.efectivoActual || 0), ivaSep = Number(data.ivaSeparado || 0);
+      const cajaTotalVal = banco + efectivo;
+      const cajaUsableVal = cajaTotalVal - ivaSep;
+
+      const ahorros = data.finanzas.filter(x => x.tipo === 'Ahorro' && x.estado !== 'Pendiente').reduce((a,b) => a + Number(b.monto), 0);
+      const obligacionesExtra = data.finanzas.filter(x => x.tipo === 'Obligación pendiente' && x.estado === 'Pendiente').reduce((a,b) => a + Number(b.monto), 0);
+      const ventasCerradas = data.ventas.filter(x => x.estado === 'Cerrado');
+      const ventasCerradasSinIva = ventasCerradas.reduce((a,b) => a + Number(b.valor), 0);
+      const utilidadMes = ventasCerradas.reduce((a,b) => a + Number(b.utilidad || 0), 0);
+      const margenPromedio = ventasCerradasSinIva > 0 ? (utilidadMes / ventasCerradasSinIva) * 100 : 0;
+      const porCobrar = data.ventas.filter(x => x.estado !== 'Perdido' && x.estadoCobro !== 'Cobrado').reduce((a,b) => a + Number(b.valor), 0);
+      const proveedorPagadoVal = data.proveedor.filter(x => x.estado === 'Pagado').reduce((a,b) => a + Number(b.monto), 0);
+      const proveedorSaldoVal = Math.max(0, DEUDA_PROVEEDOR - proveedorPagadoVal);
+      const porPagar = totalFijos + proveedorSaldoVal + obligacionesExtra;
+      const presion = cajaUsableVal + porCobrar - porPagar;
+
+      dashCaja.textContent = money(cajaTotalVal); dashPorCobrar.textContent = money(porCobrar); dashPorPagar.textContent = money(porPagar); dashPresion.textContent = money(presion);
+      dashPresion.className = 'metric ' + (presion >= 0 ? 'success' : 'danger');
+      dashFijos.textContent = money(totalFijos); dashProveedor.textContent = money(proveedorSaldoVal); dashAhorro.textContent = money(ahorros);
+      dashUtilidad.textContent = money(utilidadMes); dashMargen.textContent = margenPromedio.toFixed(1) + '%';
+      dashUtilidad.className = 'metric ' + (utilidadMes >= 0 ? 'success' : 'danger');
+      cajaTotal.textContent = money(cajaTotalVal); cajaUsable.textContent = money(cajaUsableVal);
+      proveedorPagado.textContent = money(proveedorPagadoVal); proveedorSaldo.textContent = money(proveedorSaldoVal);
+
+      const meta = Number(data.metaMensual || 0);
+      const avance = meta > 0 ? Math.min(100, (ventasCerradasSinIva / meta) * 100) : 0;
+      progresoVentas.style.width = avance + '%';
+      textoProgreso.textContent = `Avance: ${avance.toFixed(1)}% de ${money(meta)} | Falta: ${money(Math.max(0, meta - ventasCerradasSinIva))}`;
+
+      if (presion < 0) diagnosticoFlujo.textContent = `Presión negativa de ${money(Math.abs(presion))}. Prioridad: cobrar, vender con utilidad, reducir compras y pactar pagos parciales.`;
+      else diagnosticoFlujo.textContent = `Presión positiva de ${money(presion)}. No te confíes: separa IVA, baja deuda crítica y guarda el 10%.`;
+
+      if (avance < 30) diagnosticoDia.textContent = 'Diagnóstico: estás lejos de la meta. Hoy toca vender y cobrar, no distraerte con ideas nuevas.';
+      else if (avance < 70) diagnosticoDia.textContent = 'Diagnóstico: vas en camino, pero necesitas seguimiento agresivo a clientes con crédito.';
+      else diagnosticoDia.textContent = 'Diagnóstico: estás cerca. Cierra, cobra, separa IVA y protege margen.';
+
+      tablaFijos.innerHTML = gastosFijos.map(x => `<tr><td>${x.concepto}</td><td>${money(x.monto)}</td></tr>`).join('');
+      resumenFijos.textContent = `Gasto fijo mensual estimado: ${money(totalFijos)}. Esta es tu base mínima antes de deuda y crecimiento.`;
+
+      tablaFinanzas.innerHTML = data.finanzas.map((x,i) => `<tr><td>${x.fecha}</td><td>${x.tipo}</td><td>${x.categoria}</td><td>${x.detalle}</td><td>${money(x.monto)}</td><td>${badge(x.estado)}</td><td><button onclick="removeItem('finanzas',${i})">X</button></td></tr>`).join('');
+      tablaVentas.innerHTML = data.ventas.map((x,i) => `<tr><td>${x.cliente}</td><td>${x.detalle}</td><td>${money(x.valor)}</td><td>${money(x.costo)}</td><td>${money(x.gastos)}</td><td class="${x.utilidad >= 0 ? 'positive' : 'negative'}">${money(x.utilidad)}</td><td>${Number(x.margen || 0).toFixed(1)}%</td><td>${x.cobro}</td><td>${x.cobroFecha || ''}</td><td>${badge(x.estadoCobro)}</td><td><button onclick="removeItem('ventas',${i})">X</button></td></tr>`).join('');
+      tablaProveedor.innerHTML = data.proveedor.map((x,i) => `<tr><td>${x.fecha}</td><td>${money(x.monto)}</td><td>${badge(x.estado)}</td><td>${x.obs}</td><td><button onclick="removeItem('proveedor',${i})">X</button></td></tr>`).join('');
+      planProveedorTexto.textContent = proveedorSaldoVal > 0 ? `Recomendación: separa mínimo el 20% de cada cobro real para este proveedor hasta bajar el saldo. Saldo actual: ${money(proveedorSaldoVal)}.` : 'Proveedor liquidado. Ahora ese 20% debe ir a la siguiente deuda crítica.';
+
+      const ultimoReto = data.reto[data.reto.length - 1] || { vida:0, deuda:0, ahorro:0 };
+      reto70.textContent = money(ultimoReto.vida); reto20.textContent = money(ultimoReto.deuda); reto10.textContent = money(ultimoReto.ahorro);
+      tablaReto.innerHTML = data.reto.map((x,i) => `<tr><td>${x.fecha}</td><td>${money(x.ingreso)}</td><td>${money(x.vida)}</td><td>${money(x.deuda)}</td><td>${money(x.ahorro)}</td><td>${x.nota}</td><td><button onclick="removeItem('reto',${i})">X</button></td></tr>`).join('');
+
+      const todayTasks = data.tasks.filter(t => t.fecha === today).sort((a,b) => (a.hora || '').localeCompare(b.hora || ''));
+      tareasHoy.innerHTML = todayTasks.length ? todayTasks.map(t => `<p><b>${t.hora || ''}</b> ${badge(t.prioridad)} ${t.area}: ${t.texto} — ${badge(t.estado)}</p>`).join('') : '<p class="small">No hay tareas cargadas para hoy. Ese vacío también es una señal.</p>';
+      tablaTasks.innerHTML = data.tasks.map((x,i) => `<tr><td>${x.fecha}</td><td>${x.hora || ''}</td><td>${x.area}</td><td>${x.prioridad}</td><td>${x.texto}</td><td>${badge(x.estado)}</td><td><button onclick="removeItem('tasks',${i})">X</button></td></tr>`).join('');
+      tablaIdeas.innerHTML = data.ideas.map((x,i) => `<tr><td>${x.texto}</td><td>${x.impacto}</td><td>${x.facilidad}</td><td>${badge(x.estado)}</td><td>${x.comentario}</td><td><button onclick="removeItem('ideas',${i})">X</button></td></tr>`).join('');
+
+      const habitKeys = ['levantarse5am','leer','ejercicio','agua','estudiar'];
+      let done = habitKeys.filter(k => data.habits[k]).length;
+      document.querySelectorAll('.habit-card').forEach((el,idx) => el.classList.toggle('done', !!data.habits[habitKeys[idx]]));
+      disciplinaBar.style.width = (done/5*100) + '%';
+      disciplinaScore.textContent = `Disciplina del día: ${done}/5`;
+      tablaPersonal.innerHTML = data.personal.map((x,i) => {
+        const h = x.habits || {};
+        const count = habitKeys.filter(k => h[k]).length;
+        return `<tr><td>${x.fecha}</td><td>${x.energia}</td><td>${x.animo}</td><td>${x.familia}</td><td>${x.aprendizaje}</td><td>${x.reflexion}</td><td>${count}/5</td><td><button onclick="removeItem('personal',${i})">X</button></td></tr>`;
+      }).join('');
+
+      renderCalendar();
+    }
+
+    function exportData() {
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob); const a = document.createElement('a');
+      a.href = url; a.download = 'centro-operaciones-im-agrojardineria-v3-completo.json'; a.click(); URL.revokeObjectURL(url);
+    }
+
+    function clearAll() { if (confirm('¿Seguro que deseas borrar todos los datos guardados?')) { localStorage.removeItem(KEY); location.reload(); } }
+
+    initDates(); loadHeaderFields(); render();
+  </script>
+</body>
+</html>
